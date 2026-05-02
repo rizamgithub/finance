@@ -36,6 +36,28 @@ export async function createTransaction(
   return { ok: true };
 }
 
+export async function updateTransaction(
+  id: string,
+  input: unknown,
+): Promise<CreateTransactionResult> {
+  const parsed = TransactionInput.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  await prisma.transaction.update({
+    where: { id },
+    data: {
+      type: parsed.data.type,
+      category: parsed.data.category,
+      amount: parsed.data.amount,
+      date: parsed.data.date,
+      note: parsed.data.note || null,
+    },
+  });
+  revalidatePath("/");
+  return { ok: true };
+}
+
 export async function deleteTransaction(id: string) {
   await prisma.transaction.delete({ where: { id } });
   revalidatePath("/");

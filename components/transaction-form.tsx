@@ -13,27 +13,50 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { categoriesFor, type TransactionType } from "@/lib/categories";
-import { createTransaction } from "@/app/actions/transactions";
+import { createTransaction, updateTransaction } from "@/app/actions/transactions";
 
-function todayInputValue(): string {
-  const d = new Date();
+function dateInputValue(d: Date): string {
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export function TransactionForm() {
-  const [type, setType] = useState<TransactionType>("EXPENSE");
-  const [category, setCategory] = useState<string>(categoriesFor("EXPENSE")[0]);
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(todayInputValue());
-  const [note, setNote] = useState("");
+export type TransactionFormInitial = {
+  id: string;
+  type: TransactionType;
+  category: string;
+  amount: number;
+  date: Date;
+  note: string | null;
+};
+
+type Props = {
+  mode?: "create" | "edit";
+  initial?: TransactionFormInitial;
+  onDone?: () => void;
+};
+
+export function TransactionForm({ mode = "create", initial, onDone }: Props) {
+  const [type, setType] = useState<TransactionType>(initial?.type ?? "EXPENSE");
+  const [category, setCategory] = useState<string>(
+    initial?.category ?? categoriesFor(initial?.type ?? "EXPENSE")[0],
+  );
+  const [amount, setAmount] = useState(
+    initial ? String(initial.amount) : "",
+  );
+  const [date, setDate] = useState(
+    dateInputValue(initial ? new Date(initial.date) : new Date()),
+  );
+  const [note, setNote] = useState(initial?.note ?? "");
   const [pending, startTransition] = useTransition();
 
   function handleTypeChange(next: TransactionType) {
     setType(next);
-    setCategory(categoriesFor(next)[0]);
+    const allowed = categoriesFor(next);
+    if (!allowed.includes(category)) {
+      setCategory(allowed[0]);
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -43,18 +66,25 @@ export function TransactionForm() {
       toast.error("Enter an amount greater than zero");
       return;
     }
+    const payload = {
+      type,
+      category,
+      amount: amt,
+      date: new Date(date),
+      note: note || null,
+    };
     startTransition(async () => {
-      const res = await createTransaction({
-        type,
-        category,
-        amount: amt,
-        date: new Date(date),
-        note: note || null,
-      });
+      const res =
+        mode === "edit" && initial
+          ? await updateTransaction(initial.id, payload)
+          : await createTransaction(payload);
       if (res.ok) {
-        toast.success("Transaction added");
-        setAmount("");
-        setNote("");
+        toast.success(mode === "edit" ? "Transaction updated" : "Transaction added");
+        if (mode === "create") {
+          setAmount("");
+          setNote("");
+        }
+        onDone?.();
       } else {
         toast.error(res.error);
       }
@@ -130,7 +160,11 @@ export function TransactionForm() {
 
       <div className="sm:col-span-2">
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-          {pending ? "Saving..." : "Add transaction"}
+          {pending
+            ? "Saving..."
+            : mode === "edit"
+              ? "Save changes"
+              : "Add transaction"}
         </Button>
       </div>
     </form>

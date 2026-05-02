@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { formatMYR } from "@/lib/format";
 import { deleteTransaction } from "@/app/actions/transactions";
+import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
 
 type Row = {
   id: string;
@@ -44,7 +45,7 @@ export function TransactionList({ transactions }: { transactions: Row[] }) {
           <TableHead>Date</TableHead>
           <TableHead>Note</TableHead>
           <TableHead className="text-right">Amount</TableHead>
-          <TableHead className="w-[60px]"></TableHead>
+          <TableHead className="w-[110px]"></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -86,20 +87,23 @@ export function TransactionList({ transactions }: { transactions: Row[] }) {
                 {formatMYR(t.amount)}
               </TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={pending}
-                  onClick={() => {
-                    startTransition(async () => {
-                      await deleteTransaction(t.id);
-                      toast.success("Transaction deleted");
-                    });
-                  }}
-                  aria-label="Delete transaction"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex justify-end gap-1">
+                  <EditTransactionDialog transaction={t} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={pending}
+                    onClick={() => {
+                      startTransition(async () => {
+                        await deleteTransaction(t.id);
+                        toast.success("Transaction deleted");
+                      });
+                    }}
+                    aria-label="Delete transaction"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           );
