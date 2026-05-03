@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coins, LayoutDashboard, Tags } from "lucide-react";
+import { LayoutDashboard, Tags } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -15,7 +16,7 @@ export function Sidebar() {
   return (
     <aside className="hidden w-60 shrink-0 border-r bg-card md:flex md:flex-col">
       <div className="flex items-center gap-2 px-5 py-5 border-b">
-        <Coins className="h-6 w-6 text-amber-500" />
+        <Logo className="h-7 w-7" />
         <span className="font-semibold tracking-tight">Gold &amp; Finance</span>
       </div>
       <nav className="flex flex-col gap-1 p-3">

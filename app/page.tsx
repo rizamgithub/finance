@@ -1,4 +1,5 @@
-import { Coins, PieChart as PieChartIcon, BarChart3, ListChecks, PlusCircle } from "lucide-react";
+import { PieChart as PieChartIcon, BarChart3, ListChecks, PlusCircle } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TransactionForm } from "@/components/transaction-form";
 import { TransactionList } from "@/components/transaction-list";
@@ -49,7 +50,7 @@ export default async function HomePage() {
   return (
     <main className="mx-auto max-w-6xl space-y-6 p-4 sm:p-8">
       <header className="flex items-center gap-3">
-        <Coins className="h-7 w-7 text-amber-500" />
+        <Logo className="h-9 w-9" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
             Gold &amp; Finance Tracker
