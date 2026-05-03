@@ -26,7 +26,15 @@ type Row = {
   note: string | null;
 };
 
-export function EditTransactionDialog({ transaction }: { transaction: Row }) {
+export function EditTransactionDialog({
+  transaction,
+  incomeCategories,
+  expenseCategories,
+}: {
+  transaction: Row;
+  incomeCategories?: readonly string[];
+  expenseCategories?: readonly string[];
+}) {
   const [open, setOpen] = useState(false);
 
   const initial: TransactionFormInitial = {
@@ -56,6 +64,8 @@ export function EditTransactionDialog({ transaction }: { transaction: Row }) {
           mode="edit"
           initial={initial}
           onDone={() => setOpen(false)}
+          incomeCategories={incomeCategories}
+          expenseCategories={expenseCategories}
         />
       </DialogContent>
     </Dialog>

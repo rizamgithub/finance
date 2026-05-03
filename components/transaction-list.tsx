@@ -25,7 +25,15 @@ type Row = {
   note: string | null;
 };
 
-export function TransactionList({ transactions }: { transactions: Row[] }) {
+export function TransactionList({
+  transactions,
+  incomeCategories,
+  expenseCategories,
+}: {
+  transactions: Row[];
+  incomeCategories?: readonly string[];
+  expenseCategories?: readonly string[];
+}) {
   const [pending, startTransition] = useTransition();
 
   if (transactions.length === 0) {
@@ -88,7 +96,11 @@ export function TransactionList({ transactions }: { transactions: Row[] }) {
               </TableCell>
               <TableCell>
                 <div className="flex justify-end gap-1">
-                  <EditTransactionDialog transaction={t} />
+                  <EditTransactionDialog
+                    transaction={t}
+                    incomeCategories={incomeCategories}
+                    expenseCategories={expenseCategories}
+                  />
                   <Button
                     variant="ghost"
                     size="icon"

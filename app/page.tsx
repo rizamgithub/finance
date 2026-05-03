@@ -15,21 +15,36 @@ import {
   getMonthlyTrend,
 } from "@/app/actions/transactions";
 import { getGoldHolding } from "@/app/actions/gold";
+import { listCategories } from "@/app/actions/categories";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [transactions, summary, cashBalance, categoryBreakdown, monthlyTrend, gold] =
-    await Promise.all([
-      listTransactions(50),
-      getMonthlySummary(),
-      getCashBalance(),
-      getCategoryBreakdown(),
-      getMonthlyTrend(6),
-      getGoldHolding(),
-    ]);
+  const [
+    transactions,
+    summary,
+    cashBalance,
+    categoryBreakdown,
+    monthlyTrend,
+    gold,
+    categories,
+  ] = await Promise.all([
+    listTransactions(50),
+    getMonthlySummary(),
+    getCashBalance(),
+    getCategoryBreakdown(),
+    getMonthlyTrend(6),
+    getGoldHolding(),
+    listCategories(),
+  ]);
 
   const goldValue = gold.weightGrams * gold.lastKnownPrice;
+  const incomeCategories = categories
+    .filter((c) => c.type === "INCOME")
+    .map((c) => c.name);
+  const expenseCategories = categories
+    .filter((c) => c.type === "EXPENSE")
+    .map((c) => c.name);
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 p-4 sm:p-8">
@@ -91,7 +106,10 @@ export default async function HomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <TransactionForm />
+            <TransactionForm
+              incomeCategories={incomeCategories}
+              expenseCategories={expenseCategories}
+            />
           </CardContent>
         </Card>
       </section>
@@ -104,7 +122,11 @@ export default async function HomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <TransactionList transactions={transactions} />
+            <TransactionList
+              transactions={transactions}
+              incomeCategories={incomeCategories}
+              expenseCategories={expenseCategories}
+            />
           </CardContent>
         </Card>
       </section>

@@ -19,6 +19,16 @@ model Transaction {
   @@index([type])
 }
 
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  createdAt DateTime @default(now())
+
+  @@unique([name, type])
+  @@index([type])
+}
+
 model GoldHolding {
   id              String   @id @default("default")
   weightGrams     Float    @default(0)

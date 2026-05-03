@@ -12,7 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { categoriesFor, type TransactionType } from "@/lib/categories";
+import {
+  EXPENSE_CATEGORIES,
+  INCOME_CATEGORIES,
+  type TransactionType,
+} from "@/lib/categories";
 import { createTransaction, updateTransaction } from "@/app/actions/transactions";
 
 function dateInputValue(d: Date): string {
@@ -35,12 +39,24 @@ type Props = {
   mode?: "create" | "edit";
   initial?: TransactionFormInitial;
   onDone?: () => void;
+  incomeCategories?: readonly string[];
+  expenseCategories?: readonly string[];
 };
 
-export function TransactionForm({ mode = "create", initial, onDone }: Props) {
+export function TransactionForm({
+  mode = "create",
+  initial,
+  onDone,
+  incomeCategories,
+  expenseCategories,
+}: Props) {
+  const incomeOpts = incomeCategories ?? INCOME_CATEGORIES;
+  const expenseOpts = expenseCategories ?? EXPENSE_CATEGORIES;
+  const optionsFor = (t: TransactionType) =>
+    t === "INCOME" ? incomeOpts : expenseOpts;
   const [type, setType] = useState<TransactionType>(initial?.type ?? "EXPENSE");
   const [category, setCategory] = useState<string>(
-    initial?.category ?? categoriesFor(initial?.type ?? "EXPENSE")[0],
+    initial?.category ?? optionsFor(initial?.type ?? "EXPENSE")[0] ?? "",
   );
   const [amount, setAmount] = useState(
     initial ? String(initial.amount) : "",
@@ -53,9 +69,9 @@ export function TransactionForm({ mode = "create", initial, onDone }: Props) {
 
   function handleTypeChange(next: TransactionType) {
     setType(next);
-    const allowed = categoriesFor(next);
+    const allowed = optionsFor(next);
     if (!allowed.includes(category)) {
-      setCategory(allowed[0]);
+      setCategory(allowed[0] ?? "");
     }
   }
 
@@ -113,7 +129,7 @@ export function TransactionForm({ mode = "create", initial, onDone }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {categoriesFor(type).map((c) => (
+            {optionsFor(type).map((c) => (
               <SelectItem key={c} value={c}>
                 {c}
               </SelectItem>
