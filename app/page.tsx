@@ -17,10 +17,15 @@ import {
 } from "@/app/actions/transactions";
 import { getGoldHolding } from "@/app/actions/gold";
 import { listCategories } from "@/app/actions/categories";
+import { refreshGoldPriceIfStale } from "@/lib/gold-price";
 
 export const dynamic = "force-dynamic";
 
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
 export default async function HomePage() {
+  await refreshGoldPriceIfStale(ONE_HOUR_MS);
+
   const [
     transactions,
     summary,
