@@ -1,9 +1,17 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Trash2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -35,6 +43,17 @@ export function TransactionList({
   expenseCategories?: readonly string[];
 }) {
   const [pending, startTransition] = useTransition();
+  const [toDelete, setToDelete] = useState<Row | null>(null);
+
+  function confirmDelete() {
+    if (!toDelete) return;
+    const id = toDelete.id;
+    startTransition(async () => {
+      await deleteTransaction(id);
+      setToDelete(null);
+      toast.success("Transaction deleted");
+    });
+  }
 
   if (transactions.length === 0) {
     return (
@@ -45,6 +64,7 @@ export function TransactionList({
   }
 
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow>
@@ -105,12 +125,7 @@ export function TransactionList({
                     variant="ghost"
                     size="icon"
                     disabled={pending}
-                    onClick={() => {
-                      startTransition(async () => {
-                        await deleteTransaction(t.id);
-                        toast.success("Transaction deleted");
-                      });
-                    }}
+                    onClick={() => setToDelete(t)}
                     aria-label="Delete transaction"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -122,5 +137,50 @@ export function TransactionList({
         })}
       </TableBody>
     </Table>
+    <Dialog
+      open={toDelete !== null}
+      onOpenChange={(open) => {
+        if (!open && !pending) setToDelete(null);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete this transaction?</DialogTitle>
+          <DialogDescription>
+            {toDelete ? (
+              <>
+                {toDelete.type === "INCOME" ? "Income" : "Expense"} ·{" "}
+                {toDelete.category} ·{" "}
+                <span className="font-medium">{formatMYR(toDelete.amount)}</span>
+                {" · "}
+                {new Date(toDelete.date).toLocaleDateString("en-MY", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+                . This cannot be undone.
+              </>
+            ) : null}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setToDelete(null)}
+            disabled={pending}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={confirmDelete}
+            disabled={pending}
+          >
+            {pending ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

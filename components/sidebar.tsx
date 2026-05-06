@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Tags, Menu, X } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -42,6 +43,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </button>
         <Logo className="h-7 w-7" />
         <span className="font-semibold tracking-tight">Gold &amp; Finance</span>
+        <div className="ml-auto">
+          <ThemeToggle />
+        </div>
       </header>
 
       {open && (
